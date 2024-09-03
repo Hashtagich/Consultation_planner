@@ -44,6 +44,7 @@ INSTALLED_APPS += [
 
 INSTALLED_APPS += [
     'api.apps.ApiConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [

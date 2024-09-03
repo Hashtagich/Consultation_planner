@@ -1,0 +1,122 @@
+from django.db import models
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission)
+
+
+class Role(models.Model):
+    title = models.CharField(
+        'Название',
+        max_length=64,
+    )
+
+    class Meta:
+        verbose_name = 'Роль'
+        verbose_name_plural = 'Роли'
+
+    def __str__(self):
+        return self.title
+
+
+class UserManager(BaseUserManager):
+    def _create_user(self, email, password, **kwargs):
+        is_staff = kwargs.pop('is_staff', False)
+        is_superuser = kwargs.pop('is_superuser', False)
+        email = self.normalize_email(email)
+
+        user = self.model(
+            email=email,
+            is_staff=is_staff,
+            is_superuser=is_superuser,
+            is_active=True,
+            **kwargs,
+        )
+        user.set_password(password)
+        user.save(using=self.db)
+        return user
+
+    def create_user(self, email, password, **kwargs):
+        return self._create_user(email, password, **kwargs)
+
+    def create_superuser(self, email, password, **kwargs):
+        return self._create_user(
+            email=email,
+            password=password,
+            is_staff=True,
+            is_superuser=True,
+            **kwargs,
+        )
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    first_name = models.CharField(
+        'Имя',
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    middle_name = models.CharField(
+        'Отчество',
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    role = models.ForeignKey(
+        verbose_name='Роль',
+        to=Role,
+        on_delete=models.PROTECT,
+        related_name='role',
+        null=True,
+        blank=True,
+    )
+    phone = models.CharField(
+        'Номер телефона',
+        max_length=15,
+        blank=True,
+        null=True,
+        unique=True,
+    )
+    email = models.EmailField(
+        'Email',
+        null=False,
+        unique=True,
+    )
+    is_staff = models.BooleanField(
+        default=False
+    )
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name='custom_user_set',  # Новый related_name
+        blank=True,
+    )
+
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='custom_user_permissions_set',  # Новый related_name
+        blank=True,
+    )
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = (
+        'first_name',
+        'last_name',
+        'middle_name',
+        'password',
+        'email',
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        # ordering = ('-id',)
+
+    def __str__(self):
+        return f'{self.last_name} {self.first_name} {self.middle_name}'
