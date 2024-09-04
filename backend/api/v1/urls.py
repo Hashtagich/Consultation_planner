@@ -2,11 +2,13 @@ from django.urls import include, path
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
 from rest_framework.routers import DefaultRouter
+from .views.slot_view import SlotViewSet
 
 v1_router = DefaultRouter()
+v1_router.register('slots', SlotViewSet, basename='slots')
 
 urlpatterns = [
-    # path("", include(v1_router.urls)),
+    path("", include(v1_router.urls)),
     path("auth/", include('djoser.urls')),
     path("auth/", include('djoser.urls.jwt')),
 ]

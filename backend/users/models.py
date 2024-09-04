@@ -104,14 +104,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
-        'first_name',
-        'last_name',
-        'middle_name',
-        'password',
-        'email',
+        # 'first_name',
+        # 'last_name',
+        # 'middle_name',
+        # 'password',
+        # 'email',
     )
+
+    objects = UserManager()
 
     class Meta:
         verbose_name = 'Пользователь'
