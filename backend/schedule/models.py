@@ -8,6 +8,7 @@ class Slot(models.Model):
     CHOICE_STATUS = (
         ('free', 'свободна'),
         ('reserved', 'зарезервирована'),
+        ('agreement', 'на согласовании'),
         ('completed', 'завершена')
     )
 

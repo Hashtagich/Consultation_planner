@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from schedule.models import Slot, Comment
+from schedule.tasks import send_email, send_slot_notification
 from users.permissions import IsNotBlocked
 
 
@@ -77,13 +78,14 @@ class SlotViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         return Response({'error': 'Метод обновления недоступен.'}, status=405)
 
-    @extend_schema(summary="API для отмены резервирования слота")
+    @extend_schema(summary="API для отмены резервирования слота клиентом")
     @action(detail=True, methods=['patch'])
-    def cancel(self, request, pk=None):
+    def cancel_client(self, request, pk=None):
         slot = self.get_object()
 
-        if slot.client != request.user and slot.status != 'reserved':
-            return Response({'detail': 'Вы не имеете прав для отмены этого слота.'}, status=status.HTTP_403_FORBIDDEN)
+        if slot.client != request.user and slot.status not in ('agreement', 'reserved'):
+            return Response({'detail': 'Вы не имеете прав для отмены этой консультации.'},
+                            status=status.HTTP_403_FORBIDDEN)
 
         slot.change_status()
         slot.save()
@@ -100,17 +102,56 @@ class SlotViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Консультация отменена и добавлен комментарий."}, status=status.HTTP_200_OK)
 
-    @extend_schema(summary="API для резервирования слота")
+    @extend_schema(summary="API для резервирования слота клиентом")
     @action(detail=True, methods=['patch'])
     def reserve(self, request, pk=None):
         slot = self.get_object()
         user = request.user
 
         if slot.status == 'reserved' or slot.client is not None:
-            return Response({'detail': 'Слот уже зарезервирован.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Консультация уже зарезервирован.'}, status=status.HTTP_400_BAD_REQUEST)
 
         slot.client = user
-        slot.change_status(status='reserved')
+        slot.change_status(status='agreement')
         slot.save()
 
-        return Response({"detail": "Консультация зарезервирована."}, status=status.HTTP_201_CREATED)
+        title = f'Заявка на согласование консультации на {slot.start_time.strftime("%d.%m.%Y")} в {slot.start_time.strftime("%H:%M")}'
+        message = f'Клиент {user} отправил на согласование консультацию на {slot.start_time.strftime("%d.%m.%Y")} {slot.start_time.strftime("%H:%M")} - {slot.end_time.strftime("%H:%M")}'
+        sub_list = slot.specialist.email
+        send_email(title, message, sub_list)
+
+        return Response({"detail": "Резервирование консультации отправлено на согласование специалисту."},
+                        status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="API для отмены резервирования слота специалистом")
+    @action(detail=True, methods=['patch'])
+    def cancel_specialist(self, request, pk=None):
+        slot = self.get_object()
+        user = slot.client
+
+        if slot.specialist != request.user or slot.status != 'agreement':
+            return Response({'detail': 'Вы не имеете прав для отмены этого слота.'}, status=status.HTTP_403_FORBIDDEN)
+
+        slot.change_status()
+        slot.save()
+        send_slot_notification(slot, user, action="Отмена")
+
+        return Response({"detail": "Консультация не согласована, письмо/уведомление отправлено клиенту."},
+                        status=status.HTTP_200_OK)
+
+    @extend_schema(summary="API для согласования слота специалистом")
+    @action(detail=True, methods=['patch'])
+    def agree(self, request, pk=None):
+        slot = self.get_object()
+        user = request.user
+        print(slot.specialist, request.user, slot.status)
+        if slot.specialist != request.user or slot.status != 'agreement':
+            return Response({'detail': 'Вы не имеете прав для согласования этого слота.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        slot.change_status(status='reserved')
+        slot.save()
+        send_slot_notification(slot, user, action="Согласование")
+
+        return Response({"detail": "Консультация согласована специалистом, письмо/уведомление отправлено клиенту."},
+                        status=status.HTTP_201_CREATED)
