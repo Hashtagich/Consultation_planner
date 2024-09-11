@@ -48,19 +48,19 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(
-        'Имя',
+        verbose_name='Имя',
         max_length=128,
         blank=True,
         null=True,
     )
     last_name = models.CharField(
-        'Фамилия',
+        verbose_name='Фамилия',
         max_length=128,
         blank=True,
         null=True,
     )
     middle_name = models.CharField(
-        'Отчество',
+        verbose_name='Отчество',
         max_length=128,
         blank=True,
         null=True,
@@ -74,33 +74,40 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
     phone = models.CharField(
-        'Номер телефона',
+        verbose_name='Номер телефона',
         max_length=15,
         blank=True,
         null=True,
         unique=True,
     )
     email = models.EmailField(
-        'Email',
+        verbose_name='Email',
         null=False,
         unique=True,
     )
     is_staff = models.BooleanField(
+        verbose_name='Суперпользователь',
         default=False
     )
     is_active = models.BooleanField(
+        verbose_name='Активен',
         default=True
+    )
+
+    is_blocked = models.BooleanField(
+        verbose_name='Заблокирован',
+        default=False
     )
 
     groups = models.ManyToManyField(
         Group,
-        related_name='custom_user_set',  # Новый related_name
+        related_name='custom_user_set',
         blank=True,
     )
 
     user_permissions = models.ManyToManyField(
         Permission,
-        related_name='custom_user_permissions_set',  # Новый related_name
+        related_name='custom_user_permissions_set',
         blank=True,
     )
 

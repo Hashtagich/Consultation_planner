@@ -42,7 +42,7 @@ class Slot(models.Model):
         choices=CHOICE_STATUS,
         default='free'
     )
-    client = models.OneToOneField(
+    client = models.ForeignKey(
         User,
         verbose_name='Клиент',
         on_delete=models.CASCADE,
@@ -57,4 +57,59 @@ class Slot(models.Model):
         # ordering = ('-start_time',)
 
     def __str__(self):
-        return f'{self.start_time} {self.end_time} {self.context}'
+        return f'Консультация {self.start_time.strftime("%d.%m.%Y")} с {self.start_time.strftime("%H:%M")} по {self.end_time.strftime("%H:%M")} | Спец - {self.specialist}'
+
+    def change_status(self, status='free'):
+        if status not in dict(self.CHOICE_STATUS):
+            raise ValueError(f"Неверный статус. Возможные значения: {', '.join(dict(self.CHOICE_STATUS).keys())}")
+        if status == 'free':
+            self.client = None
+
+        self.status = status
+
+
+class Comment(models.Model):
+    CHOICE_REASON = (
+        ('None', 'Нет причины'),
+        ('force majeure', 'Форс-мажор'),
+        ('got sick', 'Заболел'),
+        ('schedule conflict', 'Конфликт расписания')
+    )
+
+    reason = models.CharField(
+        verbose_name='Причина',
+        max_length=50,
+        choices=CHOICE_REASON,
+        default='force majeure'
+    )
+
+    text = models.CharField(
+        verbose_name='Текст комментария',
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    client = models.ForeignKey(
+        User,
+        verbose_name='Клиент',
+        on_delete=models.CASCADE,
+        related_name='comment_client',
+        null=True,
+        blank=True
+    )
+
+    slot = models.ForeignKey(
+        Slot,
+        verbose_name='Слот',
+        on_delete=models.CASCADE,
+        related_name='comments_slot'
+    )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        # ordering = ('-id',)
+
+    def __str__(self):
+        return f'{self.reason}| {self.text}| клиент - {self.client}'

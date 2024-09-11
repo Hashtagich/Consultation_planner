@@ -1,11 +1,12 @@
 from django.urls import include, path
-from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
-                                   SpectacularSwaggerView)
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView)
 from rest_framework.routers import DefaultRouter
 from .views.slot_view import SlotViewSet
+from .views.user_view import UserViewSet
 
 v1_router = DefaultRouter()
 v1_router.register('slots', SlotViewSet, basename='slots')
+v1_router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
     path("", include(v1_router.urls)),
