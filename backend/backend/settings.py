@@ -185,11 +185,11 @@ SIMPLE_JWT = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'your_or_bot email'
-EMAIL_HOST_PASSWORD = 'your pass'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'your_email'
+EMAIL_HOST_PASSWORD = 'your_pass'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-NOTIFICATION_EMAIL = 'addressee email'
+NOTIFICATION_EMAIL = 'email'
 
 # CELERY
 CELERY_BROKER_URL = 'redis://localhost:6379'

@@ -34,7 +34,7 @@ class SlotViewSet(viewsets.ModelViewSet):
             reserved_slots = Slot.objects.filter(client=user, status='reserved')
             slots = free_slots | reserved_slots
         elif self.check_role():
-            slots = Slot.objects.filter(specialist=user, status__in=['free', 'reserved'])
+            slots = Slot.objects.filter(specialist=user, status__in=['free', 'reserved', 'agreement'])
         else:
             slots = Slot.objects.none()
 
@@ -87,8 +87,14 @@ class SlotViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Вы не имеете прав для отмены этой консультации.'},
                             status=status.HTTP_403_FORBIDDEN)
 
+        title = f'Отмена консультации {slot.start_time.strftime("%d.%m.%Y")} в {slot.start_time.strftime("%H:%M")}'
+        message = f'Клиент {slot.client} отменил консультацию на {slot.start_time.strftime("%d.%m.%Y")} {slot.start_time.strftime("%H:%M")} - {slot.end_time.strftime("%H:%M")}'
+        sub_list = slot.specialist.email
+
         slot.change_status()
         slot.save()
+
+        send_email(title, message, sub_list)
 
         comment_data = request.data.get('comment', {})
         if comment_data:
@@ -108,7 +114,7 @@ class SlotViewSet(viewsets.ModelViewSet):
         slot = self.get_object()
         user = request.user
 
-        if slot.status == 'reserved' or slot.client is not None:
+        if slot.status != 'free' or slot.client is not None:
             return Response({'detail': 'Консультация уже зарезервирован.'}, status=status.HTTP_400_BAD_REQUEST)
 
         slot.client = user
@@ -132,9 +138,9 @@ class SlotViewSet(viewsets.ModelViewSet):
         if slot.specialist != request.user or slot.status != 'agreement':
             return Response({'detail': 'Вы не имеете прав для отмены этого слота.'}, status=status.HTTP_403_FORBIDDEN)
 
+        send_slot_notification(slot, user, action="Отмена")
         slot.change_status()
         slot.save()
-        send_slot_notification(slot, user, action="Отмена")
 
         return Response({"detail": "Консультация не согласована, письмо/уведомление отправлено клиенту."},
                         status=status.HTTP_200_OK)
