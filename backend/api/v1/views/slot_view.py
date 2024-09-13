@@ -58,9 +58,26 @@ class SlotViewSet(viewsets.ModelViewSet):
 
     @extend_schema(summary="API для создания слота")
     def create(self, request, *args, **kwargs):
-        if self.check_role():
-            return super().create(request, *args, **kwargs)
-        return Response({'error': 'У вас нет прав для создания слотов.'}, status=403)
+        if not self.check_role():
+            return Response({'error': 'У вас нет прав для создания слотов.'}, status=403)
+
+        serializer = SlotSerializerForPOST(data=request.data)
+        if serializer.is_valid():
+            start_time = serializer.validated_data['start_time']
+            end_time = serializer.validated_data['end_time']
+            specialist = request.user
+
+            existing_slots = Slot.objects.filter(
+                specialist=specialist,
+                start_time=start_time,
+                end_time=end_time
+            )
+            if existing_slots.exists():
+                return Response({'error': 'Слот с такими датами уже существует.'}, status=400)
+
+            serializer.save(specialist=request.user)
+            return Response({'message': 'Слот успешно создан!', 'data': serializer.data}, status=201)
+        return Response({'error': 'Ошибка валидации', 'details': serializer.errors}, status=400)
 
     @extend_schema(summary="API для удаления слота")
     def destroy(self, request, *args, **kwargs):
