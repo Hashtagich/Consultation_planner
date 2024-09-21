@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import CustomUser
 
 
 # Create your models here.
@@ -13,7 +13,7 @@ class Slot(models.Model):
     )
 
     specialist = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='time_slots_specialist',
         verbose_name='Специалист'
@@ -44,7 +44,7 @@ class Slot(models.Model):
         default='free'
     )
     client = models.ForeignKey(
-        User,
+        CustomUser,
         verbose_name='Клиент',
         on_delete=models.CASCADE,
         related_name='time_slots_client',
@@ -92,7 +92,7 @@ class Comment(models.Model):
     )
 
     client = models.ForeignKey(
-        User,
+        CustomUser,
         verbose_name='Клиент',
         on_delete=models.CASCADE,
         related_name='comment_client',

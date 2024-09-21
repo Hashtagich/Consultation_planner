@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 INSTALLED_APPS = [
     'django.contrib.admin',

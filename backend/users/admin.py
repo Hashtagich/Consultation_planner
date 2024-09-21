@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import User, Role
+from .models import CustomUser, Role
 from schedule.tasks import send_email, generate_temporary_password
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_active')
     search_fields = ('email', 'first_name', 'last_name')

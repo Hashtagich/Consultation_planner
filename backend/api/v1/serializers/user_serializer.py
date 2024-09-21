@@ -1,5 +1,20 @@
 from rest_framework import serializers
-from users.models import User, Role
+from users.models import CustomUser, Role
+
+
+# class CustomUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CustomUser
+#         fields = (
+#             'id',
+#             'first_name',
+#             'last_name',
+#             'middle_name',
+#             'email',
+#             'role',
+#             'password'
+#         )
+
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -14,7 +29,7 @@ class MyUserSerializerForGet(serializers.ModelSerializer):
     role = serializers.CharField(source='role.title', allow_blank=True, default='')
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'id',
             'first_name',
@@ -31,7 +46,7 @@ class MyUserSerializerForGet(serializers.ModelSerializer):
 
 class MyUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'id',
             'first_name',

@@ -1,17 +1,28 @@
-from api.v1.serializers.user_serializer import MyUserSerializer, MyUserSerializerForGet
+from api.v1.serializers.user_serializer import (
+    MyUserSerializer,
+    MyUserSerializerForGet,
+    # CustomUserSerializer
+)
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.models import User
+from users.models import CustomUser
 from users.permissions import IsAdmin
+
+
+# class UserCreateView(viewsets.ModelViewSet):
+#     serializer_class = CustomUserSerializer
+#     model = CustomUser
+#     queryset = CustomUser.objects.all()
+#     permission_classes = [AllowAny]
 
 
 @extend_schema(tags=['Пользователи'])
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
 
     permission_classes = [IsAuthenticated, IsAdmin]
 
@@ -39,15 +50,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
-        return Response({'error': 'Метод обновления недоступен.'}, status=405)
+        return Response({'error': 'Метод обновления недоступен.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @extend_schema(exclude=True)
     def create(self, request, *args, **kwargs):
-        return Response({'error': 'Метод создания недоступен.'}, status=405)
+        return Response({'error': 'Метод создания недоступен.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @extend_schema(exclude=True)
     def destroy(self, request, *args, **kwargs):
-        return Response({'error': 'Метод удаления недоступен.'}, status=405)
+        return Response({'error': 'Метод удаления недоступен.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @extend_schema(summary="API для получения всех пользователей")
     def list(self, request, *args, **kwargs):

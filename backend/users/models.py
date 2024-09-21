@@ -36,17 +36,15 @@ class UserManager(BaseUserManager):
     def create_user(self, email, password, **kwargs):
         return self._create_user(email, password, **kwargs)
 
-    def create_superuser(self, email, password, **kwargs):
-        return self._create_user(
-            email=email,
-            password=password,
-            is_staff=True,
-            is_superuser=True,
-            **kwargs,
-        )
+    def create_superuser(self, email, password, role_id=None, **kwargs):
+        kwargs.setdefault('is_staff', True)
+        kwargs.setdefault('is_superuser', True)
+        kwargs.setdefault('role', None)
+
+        return self._create_user(email=email, password=password, **kwargs)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=128,
@@ -113,11 +111,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
-        'first_name',
-        'last_name',
-        'middle_name',
-        'role',
-        'password',
+        # 'first_name',
+        # 'last_name',
+        # 'middle_name',
+        # 'role',
+        # 'password',
     )
 
     objects = UserManager()

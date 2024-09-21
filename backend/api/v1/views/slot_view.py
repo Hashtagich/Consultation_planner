@@ -54,12 +54,12 @@ class SlotViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         else:
-            return Response({'error': 'У вас нет доступа к этому слоту.'}, status=403)
+            return Response({'error': 'У вас нет доступа к этому слоту.'}, status=status.HTTP_403_FORBIDDEN)
 
     @extend_schema(summary="API для создания слота")
     def create(self, request, *args, **kwargs):
         if not self.check_role():
-            return Response({'error': 'У вас нет прав для создания слотов.'}, status=403)
+            return Response({'error': 'У вас нет прав для создания слотов.'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = SlotSerializerForPOST(data=request.data)
         if serializer.is_valid():
@@ -73,27 +73,28 @@ class SlotViewSet(viewsets.ModelViewSet):
                 end_time=end_time
             )
             if existing_slots.exists():
-                return Response({'error': 'Слот с такими датами уже существует.'}, status=400)
+                return Response({'error': 'Слот с такими датами уже существует.'}, status=status.HTTP_400_BAD_REQUEST)
 
             serializer.save(specialist=request.user)
-            return Response({'message': 'Слот успешно создан!', 'data': serializer.data}, status=201)
-        return Response({'error': 'Ошибка валидации', 'details': serializer.errors}, status=400)
+            return Response({'message': 'Слот успешно создан!', 'data': serializer.data},
+                            status=status.HTTP_201_CREATED)
+        return Response({'error': 'Ошибка валидации', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(summary="API для удаления слота")
     def destroy(self, request, *args, **kwargs):
         if self.check_role():
             return super().destroy(request, *args, **kwargs)
-        return Response({'error': 'У вас нет прав для удаления слотов.'}, status=403)
+        return Response({'error': 'У вас нет прав для удаления слотов.'}, status=status.HTTP_403_FORBIDDEN)
 
     @extend_schema(summary="API для редактирования слота")
     def partial_update(self, request, *args, **kwargs):
         if self.check_role():
             return super().partial_update(request, *args, **kwargs)
-        return Response({'error': 'У вас нет прав для редактирования слотов.'}, status=403)
+        return Response({'error': 'У вас нет прав для редактирования слотов.'}, status=status.HTTP_403_FORBIDDEN)
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
-        return Response({'error': 'Метод обновления недоступен.'}, status=405)
+        return Response({'error': 'Метод обновления недоступен.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @extend_schema(summary="API для отмены резервирования слота клиентом")
     @action(detail=True, methods=['patch'])
