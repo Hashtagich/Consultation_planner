@@ -1,0 +1,27 @@
+services:
+  web:
+    build: ./backend
+    container_name: web
+    env_file:
+      - ./backend/.env
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+
+  db:
+    image: postgres:latest
+    container_name: db
+    env_file:
+      - db.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:

@@ -1,20 +1,36 @@
 from rest_framework import serializers
 from users.models import CustomUser, Role
+from djoser.serializers import UserCreateSerializer
+from django.contrib.auth import get_user_model
+
+CustUser = get_user_model()
 
 
-# class CustomUserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CustomUser
-#         fields = (
-#             'id',
-#             'first_name',
-#             'last_name',
-#             'middle_name',
-#             'email',
-#             'role',
-#             'password'
-#         )
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustUser
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'email',
+            'role',
+            'password'
+        )
 
+
+class CreateUserSerializer(UserCreateSerializer):
+    class Meta(UserCreateSerializer.Meta):
+        model = CustUser
+        fields = (
+            'first_name',
+            'last_name',
+            'middle_name',
+            # 'email',
+            # 'role',
+            'password'
+        )
 
 
 class RoleSerializer(serializers.ModelSerializer):
