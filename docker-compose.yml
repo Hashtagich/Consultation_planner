@@ -28,6 +28,16 @@
       ports:
         - "5432:5432"
 
+    nginx:
+      build: ./nginx
+      volumes:
+        - static_volume:/app/static
+        - media_volume:/app/media
+      ports:
+        - 80:80
+      depends_on:
+        - web
+
   volumes:
     pgdata:
     static_volume:
