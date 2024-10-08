@@ -36,10 +36,11 @@ class UserManager(BaseUserManager):
     def create_user(self, email, password, **kwargs):
         return self._create_user(email, password, **kwargs)
 
-    def create_superuser(self, email, password, role_id=None, **kwargs):
+    def create_superuser(self, email, password, role, **kwargs):
         kwargs.setdefault('is_staff', True)
         kwargs.setdefault('is_superuser', True)
-        kwargs.setdefault('role', None)
+        role = Role(id=role)
+        kwargs.setdefault('role', role)
 
         return self._create_user(email=email, password=password, **kwargs)
 
@@ -112,10 +113,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
         'first_name',
-        # 'last_name',
+        'last_name',
         'middle_name',
-        # 'role',
-        # 'password',
+        'role',
+        'password',
     )
 
     objects = UserManager()

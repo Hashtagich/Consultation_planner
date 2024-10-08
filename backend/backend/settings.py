@@ -28,10 +28,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", "False") == "True")
-# DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
-# ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
@@ -130,10 +128,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-# LANGUAGE_CODE = 'ru'
-#
-# TIME_ZONE = 'UTC'
 
 LANGUAGE_CODE = os.getenv('LANGUAGE_CODE')
 
