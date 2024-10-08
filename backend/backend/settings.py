@@ -173,7 +173,7 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SEND_ACTIVATION_EMAIL': False,
     'SERIALIZERS': {
-        'user_create': 'api.v1.serializers.user_serializer.CreateUserSerializer',
+        'user_create': 'api.v1.serializers.user_serializer.CustomCreateUserSerializer',
         'user': 'api.v1.serializers.user_serializer.UserSerializer',
         'current_user': 'api.v1.serializers.user_serializer.UserSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer',

@@ -20,15 +20,15 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class CreateUserSerializer(UserCreateSerializer):
+class CustomCreateUserSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = CustUser
         fields = (
             'first_name',
             'last_name',
             'middle_name',
-            # 'email',
-            # 'role',
+            'email',
+            'role',
             'password'
         )
 
