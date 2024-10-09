@@ -1,11 +1,10 @@
-from api.v1.serializers.slot_serializer import (SlotSerializerForPOST, SlotSerializerForGET, CommentSerializer,
-                                                SlotSerializerForCancel)
+from api.v1.serializers.slot_serializer import (SlotSerializerForPOST, SlotSerializerForGET, CommentSerializer)
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from schedule.models import Slot, Comment
+from schedule.models import Slot
 from schedule.tasks import send_email, send_slot_notification
 from users.permissions import IsNotBlocked
 
@@ -96,7 +95,10 @@ class SlotViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         return Response({'error': 'Метод обновления недоступен.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @extend_schema(summary="API для отмены резервирования слота клиентом")
+    @extend_schema(
+        summary="API для отмены резервирования слота клиентом",
+        request=CommentSerializer
+    )
     @action(detail=True, methods=['patch'])
     def cancel_client(self, request, pk=None):
         slot = self.get_object()
@@ -104,6 +106,18 @@ class SlotViewSet(viewsets.ModelViewSet):
         if slot.client != request.user and slot.status not in ('agreement', 'reserved'):
             return Response({'detail': 'Вы не имеете прав для отмены этой консультации.'},
                             status=status.HTTP_403_FORBIDDEN)
+
+        comment_data = request.data
+        comment_data['slot'] = slot.id
+        comment_data['client'] = request.user.id
+
+        comment_serializer = CommentSerializer(data=comment_data)
+
+        if comment_data and comment_serializer.is_valid():
+            comment_serializer.save(client=request.user)
+        elif comment_data:
+            return Response({'error': 'Ошибка валидации комментария', 'details': comment_serializer.errors},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         title = f'Отмена консультации {slot.start_time.strftime("%d.%m.%Y")} в {slot.start_time.strftime("%H:%M")}'
         message = f'Клиент {slot.client} отменил консультацию на {slot.start_time.strftime("%d.%m.%Y")} {slot.start_time.strftime("%H:%M")} - {slot.end_time.strftime("%H:%M")}'
@@ -113,16 +127,6 @@ class SlotViewSet(viewsets.ModelViewSet):
         slot.save()
 
         send_email(title, message, sub_list)
-
-        comment_data = request.data.get('comment', {})
-        if comment_data:
-            comment = Comment(
-                text=comment_data.get('text', None),
-                reason=comment_data.get('reason', 'None'),
-                client=request.user,
-                slot=slot
-            )
-            comment.save()
 
         return Response({"detail": "Консультация отменена и добавлен комментарий."}, status=status.HTTP_200_OK)
 
@@ -168,7 +172,6 @@ class SlotViewSet(viewsets.ModelViewSet):
     def agree(self, request, pk=None):
         slot = self.get_object()
         user = request.user
-        print(slot.specialist, request.user, slot.status)
         if slot.specialist != request.user or slot.status != 'agreement':
             return Response({'detail': 'Вы не имеете прав для согласования этого слота.'},
                             status=status.HTTP_403_FORBIDDEN)

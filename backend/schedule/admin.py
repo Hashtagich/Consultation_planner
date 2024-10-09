@@ -11,4 +11,4 @@ class SlotAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'reason', 'client', 'text', 'slot')
+    list_display = ('id', 'reason', 'client', 'text', 'slot', 'datetime_create')

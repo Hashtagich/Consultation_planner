@@ -39,13 +39,6 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = (
             'reason',
             'text',
-            'client'
+            'client',
+            'slot'
         )
-
-
-class SlotSerializerForCancel(serializers.ModelSerializer):
-    comment = CommentSerializer()
-
-    class Meta:
-        model = Slot
-        fields = ['id', 'comment']

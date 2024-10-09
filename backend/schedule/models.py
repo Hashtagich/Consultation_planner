@@ -55,18 +55,20 @@ class Slot(models.Model):
     class Meta:
         verbose_name = 'Cлот'
         verbose_name_plural = 'Слоты'
-        # ordering = ('-start_time',)
+        ordering = ('start_time',)
 
     def __str__(self):
         return f'Консультация {self.start_time.strftime("%d.%m.%Y")} с {self.start_time.strftime("%H:%M")} по {self.end_time.strftime("%H:%M")} | Спец - {self.specialist}'
 
     def change_status(self, status='free'):
+        """Изменение статуса слота."""
         if status not in dict(self.CHOICE_STATUS):
             raise ValueError(f"Неверный статус. Возможные значения: {', '.join(dict(self.CHOICE_STATUS).keys())}")
         if status == 'free':
             self.client = None
 
         self.status = status
+        self.save()
 
 
 class Comment(models.Model):
@@ -97,20 +99,25 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comment_client',
         null=True,
-        blank=True
     )
 
     slot = models.ForeignKey(
         Slot,
         verbose_name='Слот',
         on_delete=models.CASCADE,
-        related_name='comments_slot'
+        related_name='comments_slot',
+        null=True,
+    )
+
+    datetime_create = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        # ordering = ('-id',)
+        ordering = ('-datetime_create', 'reason')
 
     def __str__(self):
         return f'{self.reason}| {self.text}| клиент - {self.client}'
