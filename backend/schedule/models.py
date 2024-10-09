@@ -5,6 +5,7 @@ from users.models import CustomUser
 # Create your models here.
 
 class Slot(models.Model):
+    """Модель слота для консультации."""
     CHOICE_STATUS = (
         ('free', 'свободна'),
         ('reserved', 'зарезервирована'),
@@ -72,6 +73,7 @@ class Slot(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментария."""
     CHOICE_REASON = (
         ('None', 'Нет причины'),
         ('force majeure', 'Форс-мажор'),

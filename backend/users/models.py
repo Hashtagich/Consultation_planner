@@ -3,6 +3,7 @@ from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, Permi
 
 
 class Role(models.Model):
+    """Модель роли пользователя."""
     title = models.CharField(
         'Название',
         max_length=64,
@@ -46,6 +47,7 @@ class UserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    """Модель пользователя."""
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=128,

@@ -4,7 +4,7 @@ from api.v1.serializers.user_serializer import (
     MyUserSerializerForGet
 )
 from djoser import serializers
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -21,7 +21,14 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     http_method_names = ['post']
 
-    @extend_schema(summary="API для регистрации пользователя")
+    @extend_schema(
+        summary="API для регистрации пользователя",
+        request=CustomCreateUserSerializer,
+        responses={
+            201: OpenApiResponse(description="Пользователь успешно зарегистрирован."),
+            400: OpenApiResponse(description="Ошибка в данных запроса.")
+        }
+    )
     def create(self, request, *args, **kwargs):
 
         serializer = self.serializer_class(data=request.data)
@@ -50,7 +57,13 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return MyUserSerializer
 
-    @extend_schema(summary="API для блокировки пользователя")
+    @extend_schema(
+        summary="API для разблокировки пользователя",
+        request=None,
+        responses={
+            200: OpenApiResponse(description="Пользователь заблокирован."),
+        }
+    )
     @action(detail=True, methods=['patch'])
     def block_user(self, request, pk=None):
         user = self.get_object()
@@ -58,7 +71,13 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({"message": f"Пользователь {user} заблокирован."}, status=status.HTTP_200_OK)
 
-    @extend_schema(summary="API для разблокировки пользователя")
+    @extend_schema(
+        summary="API для разблокировки пользователя",
+        request=None,
+        responses={
+            200: OpenApiResponse(description="Пользователь разблокирован."),
+        }
+    )
     @action(detail=True, methods=['patch'])
     def unblock_user(self, request, pk=None):
         user = self.get_object()
