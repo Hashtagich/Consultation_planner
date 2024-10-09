@@ -45,7 +45,7 @@ git clone https://github.com/Hashtagich/Consultation_planner.git
 ```
 
 ### 2. Установка переменных окружения
-***В корен проекта заполняем файл template.db.env и переименовываем его в db.env или просто создаём файл db.env и заполняем его***
+***В корене проекта заполняем файл template.db.env и переименовываем его в db.env или просто создаём файл db.env и заполняем его***
 ```bash
 POSTGRES_DB=Например, db
 POSTGRES_USER=Например, db
