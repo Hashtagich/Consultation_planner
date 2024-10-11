@@ -103,8 +103,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @extend_schema(summary="API для получения конкретного пользователя по ID")
     def retrieve(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
 
     @extend_schema(summary="API для редактирования конкретного пользователя по ID")
     def partial_update(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
